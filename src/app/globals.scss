@@ -1,0 +1,30 @@
+:root {
+  --background: #061125;
+  --foreground: #ffffff;
+  --text-body: #d1d1d1;
+  --primary: #00e5ff;
+  --secondary: #99ff00;
+  --surface: #121e36;
+  --surface-hover: #192a4a;
+  --border: rgba(255, 255, 255, 0.08);
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-body);
+  font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--foreground);
+}
