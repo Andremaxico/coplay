@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { GameType } from '../types'
 
 export async function createGame(formData: FormData) {
     const supabase = await createClient()
@@ -45,4 +46,20 @@ export async function joinGameAction(gameId: string) {
     if (!data) return { error: 'На жаль, вільних місць вже немає' }
 
     revalidatePath(`/games/${gameId}`)
+}
+
+export const getGames = async () => {
+    const supabase = await createClient()
+    const { data: games, error } = await supabase
+        .from('games')
+        .select('*')
+        .order('starts_at', { ascending: true })
+        .limit(10)
+
+    if (error) {
+        console.error('Error fetching games:', error, error.message)
+        return { error: error.message }
+    }
+
+    return games || [] as GameType[]
 }

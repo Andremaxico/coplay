@@ -1,12 +1,16 @@
+@use "./nullstyle.scss";
+
 :root {
-  --background: #061125;
+  --background: #001a33;
   --foreground: #ffffff;
-  --text-body: #d1d1d1;
-  --primary: #00e5ff;
-  --secondary: #99ff00;
-  --surface: #121e36;
-  --surface-hover: #192a4a;
+  --text-title: #d1d1d1;
+  --text-body: #f0e6d6;
+  --primary: #ff0000;
+  --secondary: #ff9900;
+  --surface: #08213e;
+  --surface-hover: #0d2f59;
   --border: rgba(255, 255, 255, 0.08);
+  --header-height: 80px;
 }
 
 html {
@@ -14,7 +18,6 @@ html {
 }
 
 body {
-  background: var(--background);
   color: var(--text-body);
   font-family: var(--font-poppins), Arial, Helvetica, sans-serif;
   min-height: 100%;
@@ -25,6 +28,100 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+// Global default heading color
 h1, h2, h3, h4, h5, h6 {
-  color: var(--foreground);
+  color: var(--text-title);
+  margin: 0;
 }
+
+// Global Typography Classes
+.h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+  color: var(--foreground);
+
+  @media (min-width: 768px) {
+    font-size: 3.25rem;
+  }
+}
+
+.h2 {
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+  color: var(--text-title);
+
+  @media (min-width: 768px) {
+    font-size: 2.25rem;
+  }
+}
+
+.h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-title);
+
+  @media (min-width: 768px) {
+    font-size: 1.65rem;
+  }
+}
+
+.h4 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text-title);
+
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+  }
+}
+
+// Global Text Sizes
+.text-lead {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+
+.text-body-lg {
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.text-body {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.text-small {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.text-xsmall {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+// Global Text Colors/Values
+.text-primary {
+  color: var(--primary) !important;
+}
+
+.text-secondary {
+  color: var(--secondary) !important;
+}
+
+.text-light {
+  color: var(--foreground) !important;
+}
+
+.text-muted {
+  color: rgba(240, 230, 214, 0.6) !important; // beige with opacity
+}
+

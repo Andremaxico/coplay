@@ -17,18 +17,18 @@
   padding: 8px 18px;
   font-size: 14px;
   font-weight: 600;
-  color: #061125;
+  color: #ffffff;
   background-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
 
   &:hover {
-    background-color: #33ebff;
-    box-shadow: 0 4px 18px rgba(0, 229, 255, 0.3);
+    background-color: #ff3333;
+    box-shadow: 0 4px 18px rgba(255, 0, 0, 0.35);
     transform: translateY(-1px);
   }
 
   &:active {
-    background-color: #00bcd4;
+    background-color: #cc0000;
   }
 }
 
@@ -36,13 +36,13 @@
   padding: 10px 20px;
   font-size: 15px;
   font-weight: 600;
-  color: #061125;
+  color: #ffffff;
   background-color: var(--secondary);
-  box-shadow: 0 4px 12px rgba(153, 255, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
 
   &:hover {
-    background-color: #b3ff33;
-    box-shadow: 0 4px 18px rgba(153, 255, 0, 0.3);
+    background-color: #ffaa33;
+    box-shadow: 0 4px 18px rgba(255, 153, 0, 0.35);
     transform: translateY(-1px);
   }
 }

@@ -1,0 +1,119 @@
+.profileCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 1rem;
+}
+
+.cardAvatarCircle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.03);
+  color: var(--text-title);
+}
+
+.cardAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardUserInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cardUserName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.cardUserEmail {
+  font-size: 11px;
+  color: var(--text-body);
+  opacity: 0.6;
+}
+
+.cardDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.detailLabel {
+  color: var(--text-body);
+  opacity: 0.6;
+}
+
+.detailValue {
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.cardActions {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+.editBtn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  background-color: var(--surface-hover);
+  color: var(--text-title);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+}
+
+.logoutForm {
+  display: flex;
+}
+
+.logoutBtn {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 8px;
+  background-color: rgba(255, 82, 82, 0.1);
+  color: #ff5252;
+  border: 1px solid rgba(255, 82, 82, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: rgba(255, 82, 82, 0.2);
+    border-color: #ff5252;
+  }
+}

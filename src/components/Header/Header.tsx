@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { CoPlayLogo } from '@/UI/CoPlayLogo/CoPlayLogo'
-import { AuthButtons } from './AuthButtons/AuthButtons'
 import styles from './Header.module.scss'
+import { HeaderProfile } from './HeaderProfile/HeaderProfile'
 
 export async function Header() {
   const supabase = await createClient()
@@ -13,9 +13,9 @@ export async function Header() {
       <Link href="/" className={styles.logoWrapper}>
         <CoPlayLogo />
       </Link>
-      
+
       <div className={styles.accountWrapper}>
-        <AuthButtons user={user} />
+        <HeaderProfile user={user} />
       </div>
     </header>
   )

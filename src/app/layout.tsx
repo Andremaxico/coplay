@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import { Header } from "@/components/Header/Header";
+import { HeaderHeightResolver } from "@/components/Header/HeaderHeightResolver";
 import "./globals.scss";
 
 const poppins = Poppins({
@@ -25,6 +26,7 @@ export default function RootLayout({
       className={poppins.variable}
     >
       <body>
+        <HeaderHeightResolver />
         <Header />
         {children}
       </body>
