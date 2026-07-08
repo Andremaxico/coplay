@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
+import { SportType } from '../types'
 
 export async function signInWithGoogle() {
     const supabase = await createClient()
@@ -66,11 +67,11 @@ export async function updateProfileMetadata(metadata: {
     last_name?: string
     phone?: string
     telegram?: string
-    main_sport?: string
+    main_sport?: SportType
 }) {
     const supabase = await createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
+
     if (userError || !user) {
         return { error: 'Неавторизовано' }
     }
@@ -127,10 +128,27 @@ export async function updateProfileMetadata(metadata: {
             avatar_data: null // clean up old base64 field
         }
     })
-    
+
     if (error) {
         return { error: error.message }
     }
-    
+
+    // Upsert public profiles table to keep in sync
+    const { error: profileError } = await supabase.from('profiles').upsert({
+        id: user.id,
+        first_name: metadata.first_name,
+        last_name: metadata.last_name,
+        phone: metadata.phone,
+        telegram: metadata.telegram,
+        main_sport: metadata.main_sport,
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString()
+    })
+
+    if (profileError) {
+        console.error('Failed to sync profiles table:', profileError)
+        return { error: `Профіль оновлено в системі, але виникла помилка синхронізації з базою даних: ${profileError.message}` }
+    }
+
     return { success: true }
 }

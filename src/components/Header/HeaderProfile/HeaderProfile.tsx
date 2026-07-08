@@ -6,22 +6,9 @@ import { LoginIcon, ProfileIcon } from '@/UI/Icons/Icons'
 import { LoginPopup } from '../../LoginPopup/LoginPopup'
 import { ProfileEditModal } from './ProfileEditModal/ProfileEditModal'
 import { ProfileCardModal } from './ProfileCardModal/ProfileCardModal'
+import { CreateGameModal } from './CreateGameModal/CreateGameModal'
+import { UserType } from '@/app/types'
 import styles from './HeaderProfile.module.scss'
-
-type UserMetadataType = {
-    avatar_data?: string
-    avatar_url?: string
-    first_name?: string
-    last_name?: string
-    phone?: string
-    telegram?: string
-    main_sport?: string
-}
-
-type UserType = {
-    email?: string | null
-    user_metadata?: UserMetadataType
-}
 
 type PropsType = {
     user: UserType | null
@@ -32,6 +19,7 @@ export type ModeType = 'closed' | 'login' | 'register'
 export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
     const [mode, setMode] = useState<ModeType>('closed')
     const [isProfileEditOpen, setIsProfileEditOpen] = useState(false)
+    const [isCreateGameOpen, setIsCreateGameOpen] = useState(false)
 
     const isProfileFilled = !!(
         user?.user_metadata?.first_name &&
@@ -43,7 +31,10 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
     if (user) {
         return (
             <div className={styles.container}>
-                <button className={styles.createGameButton}>
+                <button
+                    className={styles.createGameButton}
+                    onClick={() => setIsCreateGameOpen(true)}
+                >
                     Створити гру
                 </button>
                 <div className={styles.profileWrapper}>
@@ -81,18 +72,32 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
                     </div>
                 </div>
 
+                {/* key is needed for full re-rendering after open/close  */}
                 <ProfileEditModal
-                    key={isProfileEditOpen ? 'open' : 'closed'}
+                    key={isProfileEditOpen ? 'profile-edit-open' : 'profile-edit-closed'}
                     user={user}
                     isOpen={isProfileEditOpen}
                     onClose={() => setIsProfileEditOpen(false)}
+                />
+
+                {/* key is needed for full re-rendering after open/close */}
+                <CreateGameModal
+                    key={isCreateGameOpen ? 'create-game-open' : 'create-game-closed'}
+                    isOpen={isCreateGameOpen}
+                    onClose={() => setIsCreateGameOpen(false)}
                 />
             </div>
         )
     }
 
     return (
-        <>
+        <div className={styles.container}>
+            <button
+                className={styles.createGameButton}
+                onClick={() => setMode('login')}
+            >
+                Створити гру
+            </button>
             <button
                 onClick={() => setMode('login')}
                 className={styles.iconBtn}
@@ -108,6 +113,6 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
                     onClose={() => setMode('closed')}
                 />
             )}
-        </>
+        </div>
     )
 }

@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { GameType } from '../types'
+import { GameType, SportType } from '../types'
 
 export async function createGame(formData: FormData) {
     const supabase = await createClient()
@@ -62,4 +62,56 @@ export const getGames = async () => {
     }
 
     return games || [] as GameType[]
+}
+
+export async function getExistingLocations(): Promise<string[]> {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+        .from('games')
+        .select('location_text')
+
+    if (error) {
+        console.error('Error fetching locations:', error)
+        return []
+    }
+
+    const locations = data
+        .map(g => g.location_text)
+        .filter((loc): loc is string => typeof loc === 'string' && loc.trim() !== '')
+
+    return Array.from(new Set(locations))
+}
+
+export async function createGameAction(data: {
+    sport_type: SportType
+    title: string
+    location_text: string
+    starts_at: string
+    max_participants: number
+    is_public?: boolean
+}) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'Неавторизовано' }
+    }
+
+    const { error } = await supabase.from('games').insert({
+        organizer_id: user.id,
+        sport: data.sport_type,
+        title: data.title,
+        location_text: data.location_text,
+        starts_at: data.starts_at,
+        slots_total: data.max_participants,
+        is_public: data.is_public ?? true,
+    })
+
+    if (error) {
+        console.error('Error creating game:', error)
+        return { error: error.message }
+    }
+
+    revalidatePath('/')
+    return { success: true }
 }

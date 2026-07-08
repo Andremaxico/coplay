@@ -3,22 +3,8 @@
 import React from 'react'
 import { signOut } from '@/app/actions/auth'
 import { ProfileIcon } from '@/UI/Icons/Icons'
+import { UserType } from '@/app/types'
 import styles from './ProfileCardModal.module.scss'
-
-type UserMetadataType = {
-    avatar_data?: string
-    avatar_url?: string
-    first_name?: string
-    last_name?: string
-    phone?: string
-    telegram?: string
-    main_sport?: string
-}
-
-type UserType = {
-    email?: string | null
-    user_metadata?: UserMetadataType
-}
 
 type PropsType = {
     user: UserType | null

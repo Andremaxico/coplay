@@ -3,25 +3,12 @@
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateProfileMetadata } from '@/app/actions/auth'
+import { SportType, UserType } from '@/app/types'
 import { Button } from '@/UI/Button/Button'
 import { Input } from '@/UI/Input/Input'
 import { Select } from '@/UI/Select/Select'
 import { CloseIcon } from '@/UI/Icons/Icons'
 import styles from './ProfileEditModal.module.scss'
-
-type UserMetadataType = {
-    avatar_data?: string
-    avatar_url?: string
-    first_name?: string
-    last_name?: string
-    phone?: string
-    telegram?: string
-    main_sport?: string
-}
-
-type UserType = {
-    user_metadata?: UserMetadataType
-}
 
 type PropsType = {
     user: UserType | null
@@ -37,7 +24,7 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
     const [lastName, setLastName] = useState(user?.user_metadata?.last_name || '')
     const [phone, setPhone] = useState(user?.user_metadata?.phone || '')
     const [telegram, setTelegram] = useState(user?.user_metadata?.telegram || '')
-    const [mainSport, setMainSport] = useState(user?.user_metadata?.main_sport || 'football')
+    const [mainSport, setMainSport] = useState<SportType>((user?.user_metadata?.main_sport as SportType) || 'football')
     
     // Image cropping states
     const [imageSrc, setImageSrc] = useState<string | null>(user?.user_metadata?.avatar_url || user?.user_metadata?.avatar_data || null)
@@ -324,7 +311,7 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
                     <Select
                         label="Основний вид спорту"
                         value={mainSport}
-                        onChange={(e) => setMainSport(e.target.value)}
+                        onChange={(e) => setMainSport(e.target.value as SportType)}
                         required
                     >
                         <option value="football">Футбол</option>
