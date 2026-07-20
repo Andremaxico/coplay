@@ -1,8 +1,9 @@
 .main {
-  max-width: 800px;
+  max-width: 1180px;
   min-height: 100vh;
   box-sizing: border-box;
   padding: calc(var(--header-height) + 16px) 1rem 16px 1rem;
+  margin: 0 auto;
 }
 
 .title {

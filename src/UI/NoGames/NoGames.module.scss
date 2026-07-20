@@ -1,0 +1,85 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 40px 20px;
+  min-height: 350px;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  padding: 36px 24px;
+  background: rgba(8, 33, 62, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 153, 0, 0.12); // subtle secondary color border
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 
+              0 0 32px rgba(255, 153, 0, 0.02);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: rgba(255, 153, 0, 0.25);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), 
+                0 0 40px rgba(255, 153, 0, 0.06);
+    transform: translateY(-2px);
+  }
+}
+
+.iconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 153, 0, 0.08);
+  border: 1px solid rgba(255, 153, 0, 0.2);
+  margin-bottom: 20px;
+  color: var(--secondary);
+  box-shadow: inset 0 0 12px rgba(255, 153, 0, 0.05);
+}
+
+.icon {
+  width: 32px;
+  height: 32px;
+  stroke: currentColor;
+}
+
+.title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 12px;
+  letter-spacing: -0.01em;
+}
+
+.message {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(240, 230, 214, 0.85);
+  margin-bottom: 24px;
+  max-width: 380px;
+}
+
+.button {
+  min-width: 160px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

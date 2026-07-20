@@ -1,16 +1,13 @@
 import React from 'react'
 import { GamesTitle } from './GamesTitle/GamesTitle'
-import { getGames } from '@/app/actions/games'
 import { GamesList } from './GamesList/GamesList';
+import styles from './Games.module.scss'
 
-export const Games = async () => {
-    const gamesData = await getGames()
-    const games = Array.isArray(gamesData) ? gamesData : []
-
+export const Games = () => {
     return (
-        <div>
+        <div className={styles.games}>
             <GamesTitle />
-            <GamesList games={games} />
+            <GamesList />
         </div>
     )
 }
