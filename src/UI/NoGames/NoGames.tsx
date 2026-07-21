@@ -1,19 +1,42 @@
+'use client';
+
 import React from 'react';
-import Link from 'next/link';
 import styles from './NoGames.module.scss';
 import buttonStyles from '../Button/Button.module.scss';
+import { useModalStore } from '@/store/useModalStore';
+import { createClient } from '@/lib/supabase/client';
 
 interface NoGamesProps {
   title?: string;
   message?: string;
   showCreateButton?: boolean;
+  onCreateGameClick?: () => void;
 }
 
 export function NoGames({
   title = 'Ігор не знайдено',
   message = 'Зараз немає запланованих ігор. Створіть власну гру, щоб знайти партнерів, або спробуйте змінити фільтри пошуку.',
   showCreateButton = true,
+  onCreateGameClick,
 }: NoGamesProps) {
+  const openCreateGame = useModalStore((state) => state.openCreateGame);
+  const openLogin = useModalStore((state) => state.openLogin);
+
+  const handleCreateGameClick = async () => {
+    if (onCreateGameClick) {
+      onCreateGameClick();
+      return;
+    }
+
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      openCreateGame();
+    } else {
+      openLogin();
+    }
+  };
+
   return (
     <div className={styles.wrapper}>
       <div className={styles.card}>
@@ -39,12 +62,13 @@ export function NoGames({
         <h3 className={styles.title}>{title}</h3>
         <p className={styles.message}>{message}</p>
         {showCreateButton && (
-          <Link
-            href="/games/new"
+          <button
+            type="button"
+            onClick={handleCreateGameClick}
             className={`${buttonStyles.btn} ${buttonStyles.primary} ${styles.button}`}
           >
             Створити гру
-          </Link>
+          </button>
         )}
       </div>
     </div>

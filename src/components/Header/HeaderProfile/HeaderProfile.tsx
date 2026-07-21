@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import { LoginIcon, ProfileIcon } from '@/UI/Icons/Icons'
 import { LoginPopup } from '../../LoginPopup/LoginPopup'
@@ -8,6 +8,7 @@ import { ProfileEditModal } from './ProfileEditModal/ProfileEditModal'
 import { ProfileCardModal } from './ProfileCardModal/ProfileCardModal'
 import { CreateGameModal } from './CreateGameModal/CreateGameModal'
 import { UserType } from '@/app/types'
+import { useModalStore } from '@/store/useModalStore'
 import styles from './HeaderProfile.module.scss'
 
 type PropsType = {
@@ -17,9 +18,18 @@ type PropsType = {
 export type ModeType = 'closed' | 'login' | 'register'
 
 export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
-    const [mode, setMode] = useState<ModeType>('closed')
-    const [isProfileEditOpen, setIsProfileEditOpen] = useState(false)
-    const [isCreateGameOpen, setIsCreateGameOpen] = useState(false)
+    const {
+        authMode,
+        setAuthMode,
+        openLogin,
+        closeAuth,
+        isProfileEditOpen,
+        openProfileEdit,
+        closeProfileEdit,
+        isCreateGameOpen,
+        openCreateGame,
+        closeCreateGame,
+    } = useModalStore()
 
     const isProfileFilled = !!(
         user?.user_metadata?.first_name &&
@@ -33,7 +43,7 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
             <div className={styles.container}>
                 <button
                     className={styles.createGameButton}
-                    onClick={() => setIsCreateGameOpen(true)}
+                    onClick={openCreateGame}
                 >
                     Створити гру
                 </button>
@@ -54,7 +64,7 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
                         {isProfileFilled ? (
                             <ProfileCardModal
                                 user={user}
-                                onEditClick={() => setIsProfileEditOpen(true)}
+                                onEditClick={openProfileEdit}
                             />
                         ) : (
                             <div className={styles.unfilledWarning}>
@@ -62,7 +72,7 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
                                     Будь ласка, заповніть свій профіль, щоб користуватися всіма функціями сайту.
                                 </p>
                                 <button
-                                    onClick={() => setIsProfileEditOpen(true)}
+                                    onClick={openProfileEdit}
                                     className={styles.dropdownItem}
                                 >
                                     Заповнити профіль
@@ -72,20 +82,28 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
                     </div>
                 </div>
 
-                {/* key is needed for full re-rendering after open/close  */}
+                {/* key is needed for full re-rendering after open/close */}
                 <ProfileEditModal
                     key={isProfileEditOpen ? 'profile-edit-open' : 'profile-edit-closed'}
                     user={user}
                     isOpen={isProfileEditOpen}
-                    onClose={() => setIsProfileEditOpen(false)}
+                    onClose={closeProfileEdit}
                 />
 
                 {/* key is needed for full re-rendering after open/close */}
                 <CreateGameModal
                     key={isCreateGameOpen ? 'create-game-open' : 'create-game-closed'}
                     isOpen={isCreateGameOpen}
-                    onClose={() => setIsCreateGameOpen(false)}
+                    onClose={closeCreateGame}
                 />
+
+                {authMode !== 'closed' && (
+                    <LoginPopup
+                        mode={authMode}
+                        setMode={setAuthMode}
+                        onClose={closeAuth}
+                    />
+                )}
             </div>
         )
     }
@@ -94,25 +112,31 @@ export const HeaderProfile: React.FC<PropsType> = ({ user }) => {
         <div className={styles.container}>
             <button
                 className={styles.createGameButton}
-                onClick={() => setMode('login')}
+                onClick={openLogin}
             >
                 Створити гру
             </button>
             <button
-                onClick={() => setMode('login')}
+                onClick={openLogin}
                 className={styles.iconBtn}
                 title="Увійти"
             >
                 <LoginIcon />
             </button>
 
-            {mode !== 'closed' && (
+            {authMode !== 'closed' && (
                 <LoginPopup
-                    mode={mode}
-                    setMode={setMode}
-                    onClose={() => setMode('closed')}
+                    mode={authMode}
+                    setMode={setAuthMode}
+                    onClose={closeAuth}
                 />
             )}
+
+            <CreateGameModal
+                key={isCreateGameOpen ? 'create-game-open' : 'create-game-closed'}
+                isOpen={isCreateGameOpen}
+                onClose={closeCreateGame}
+            />
         </div>
     )
 }
