@@ -1,15 +1,11 @@
 import React from 'react'
-import styles from './GamesCard.module.scss'
 import { GameType } from '@/app/types'
+import { GameCard } from '@/UI/GameCard/GameCard'
 
 type PropsType = {
-    game: GameType,
+    game: GameType
 }
 
 export const GamesCard: React.FC<PropsType> = ({ game }) => {
-    return (
-        <div className={styles.card}>
-            <h4 className={styles.title}>{game.title}</h4>
-        </div>
-    )
+    return <GameCard game={game} />
 }

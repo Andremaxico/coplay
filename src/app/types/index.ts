@@ -1,5 +1,11 @@
 export type SportType = 'football' | 'basketball' | 'volleyball' | 'tennis' | 'other';
 
+export interface OrganizerType {
+  first_name?: string;
+  last_name?: string;
+  avatar_url?: string;
+}
+
 export interface GameType {
   id: string;
   created_at: string;
@@ -9,7 +15,9 @@ export interface GameType {
   location_text: string;
   starts_at: string;
   max_participants: number;
+  current_participants?: number;
   is_public: boolean;
+  organizer?: OrganizerType;
 }
 
 export interface UserMetadataType {

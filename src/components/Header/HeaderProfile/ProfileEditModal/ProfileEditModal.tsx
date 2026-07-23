@@ -215,7 +215,7 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
 
                 <h2 className={styles.modalTitle}>Заповнити профіль</h2>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form noValidate onSubmit={handleSubmit} className={styles.form}>
                     {error && <div className={styles.errorAlert}>{error}</div>}
                     {success && <div className={styles.successAlert}>{success}</div>}
 

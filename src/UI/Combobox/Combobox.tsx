@@ -15,6 +15,8 @@ interface ComboboxProps {
     options: ComboboxOption[]
     placeholder?: string
     required?: boolean
+    error?: string
+    helperText?: string
     className?: string
 }
 
@@ -25,6 +27,8 @@ export function Combobox({
     options,
     placeholder,
     required = false,
+    error: externalError,
+    helperText,
     className = ''
 }: ComboboxProps) {
     const [isOpen, setIsOpen] = useState(false)
@@ -115,6 +119,30 @@ export function Combobox({
         }
     }
 
+    const [internalError, setInternalError] = useState<string | null>(null)
+    const [touched, setTouched] = useState(false)
+
+    const displayError = externalError !== undefined ? externalError : (touched ? internalError : null)
+
+    const handleInvalid = (e: React.InvalidEvent<HTMLInputElement>) => {
+        e.preventDefault()
+        if (e.currentTarget.validity.valueMissing) {
+            setInternalError("Це поле є обов'язковим для заповнення")
+        } else {
+            setInternalError('Оберіть або введіть значення')
+        }
+        setTouched(true)
+    }
+
+    const handleBlur = () => {
+        setTouched(true)
+        if (required && (!value || !value.trim())) {
+            setInternalError("Це поле є обов'язковим для заповнення")
+        } else {
+            setInternalError(null)
+        }
+    }
+
     return (
         <div className={`${styles.field} ${className}`} ref={containerRef}>
             {label && <label className={styles.label}>{label}</label>}
@@ -122,10 +150,12 @@ export function Combobox({
                 <input
                     ref={inputRef}
                     type="text"
-                    className={styles.input}
+                    className={`${styles.input} ${displayError ? styles.hasError : ''}`}
                     value={searchTerm || ''}
                     onChange={handleInputChange}
                     onFocus={() => setIsOpen(true)}
+                    onBlur={handleBlur}
+                    onInvalid={handleInvalid}
                     placeholder={placeholder}
                     required={required}
                     onKeyDown={handleKeyDown}
@@ -179,6 +209,27 @@ export function Combobox({
                     </ul>
                 )}
             </div>
+            {displayError ? (
+                <span className={styles.errorMessage}>
+                    <svg
+                        className={styles.errorIcon}
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                    {displayError}
+                </span>
+            ) : helperText ? (
+                <span className={styles.helperText}>{helperText}</span>
+            ) : null}
         </div>
     )
 }

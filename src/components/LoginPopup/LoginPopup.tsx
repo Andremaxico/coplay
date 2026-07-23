@@ -97,7 +97,7 @@ export const LoginPopup: React.FC<PropsType> = ({ mode, setMode, onClose }) => {
                 {mode === 'login' ? (
                     <div className={styles.modalFormWrapper}>
                         <h2 className={styles.modalTitle}>Вхід</h2>
-                        <form onSubmit={handleLoginSubmit} className={styles.form}>
+                        <form noValidate onSubmit={handleLoginSubmit} className={styles.form}>
                             {error && <div className={styles.errorAlert}>{error}</div>}
 
                             <Input
@@ -152,7 +152,7 @@ export const LoginPopup: React.FC<PropsType> = ({ mode, setMode, onClose }) => {
                 ) : (
                     <div className={styles.modalFormWrapper}>
                         <h2 className={styles.modalTitle}>Реєстрація</h2>
-                        <form onSubmit={handleRegisterSubmit} className={styles.form}>
+                        <form noValidate onSubmit={handleRegisterSubmit} className={styles.form}>
                             {error && <div className={styles.errorAlert}>{error}</div>}
                             {success && <div className={styles.successAlert}>{success}</div>}
 

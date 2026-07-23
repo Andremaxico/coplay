@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { GameType, SportType } from '../types'
 
+export type GameModel = Omit<GameType, 'id' | 'created_at'>;
+
 export async function createGame(formData: FormData) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -50,18 +52,47 @@ export async function joinGameAction(gameId: string) {
 
 export const getGames = async () => {
     const supabase = await createClient()
+
     const { data: games, error } = await supabase
         .from('games')
         .select('*')
         .order('starts_at', { ascending: true })
-        .limit(10)
+        .limit(20)
 
     if (error) {
-        console.error('Error fetching games:', error, error.message)
+        console.error('Error fetching games:', error)
         return { error: error.message }
     }
 
-    return games || [] as GameType[]
+    if (!games || games.length === 0) return []
+
+    // Fetch organizer profiles using organizer_id
+    const organizerIds = Array.from(new Set(games.map(g => g.organizer_id).filter(Boolean)))
+
+    const profilesMap: Record<string, { first_name?: string; avatar_url?: string }> = {}
+
+    if (organizerIds.length > 0) {
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, first_name, avatar_url')
+            .in('id', organizerIds)
+
+        if (profiles) {
+            profiles.forEach(p => {
+                profilesMap[p.id] = {
+                    first_name: p.first_name,
+                    avatar_url: p.avatar_url
+                }
+            })
+        }
+    }
+
+    const gamesWithOrganizers = games.map(game => ({
+        ...game,
+        organizer: profilesMap[game.organizer_id] || undefined
+    }))
+
+    return gamesWithOrganizers as unknown as GameType[]
 }
 
 export async function getExistingLocations(): Promise<string[]> {
@@ -97,14 +128,15 @@ export async function createGameAction(data: {
         return { error: 'Неавторизовано' }
     }
 
-    const { error } = await supabase.from('games').insert({
+    const { error } = await supabase.from('games').insert<GameModel>({
         organizer_id: user.id,
-        sport: data.sport_type,
+        sport_type: data.sport_type,
         title: data.title,
         location_text: data.location_text,
         starts_at: data.starts_at,
-        slots_total: data.max_participants,
+        max_participants: data.max_participants,
         is_public: data.is_public ?? true,
+        current_participants: 1,
     })
 
     if (error) {

@@ -92,33 +92,57 @@ export const CreateGameModal: React.FC<PropsType> = ({ isOpen, onClose }) => {
         }
     }, [isOpen, isTitleDirty, sportType])
 
+    // Field errors state
+    const [fieldErrors, setFieldErrors] = useState<{
+        sportType?: string
+        title?: string
+        selectedLocation?: string
+        startsAt?: string
+        maxParticipants?: string
+    }>({})
+
     if (!isOpen) return null
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault()
         setError(null)
         setSuccess(null)
-        setLoading(true)
+        
+        const errors: typeof fieldErrors = {}
 
+        if (!sportType) {
+            errors.sportType = "Оберіть вид спорту"
+        }
+        if (!title || !title.trim()) {
+            errors.title = "Введіть назву гри"
+        }
         const finalLocation = selectedLocation?.trim()
-
         if (!finalLocation) {
-            setError('Будь ласка, вкажіть місце проведення гри')
-            setLoading(false)
+            errors.selectedLocation = "Вкажіть місце проведення гри"
+        }
+        if (!startsAt) {
+            errors.startsAt = "Вкажіть дату та час початку"
+        } else if (new Date(startsAt).getTime() < Date.now() - 60000) {
+            errors.startsAt = "Час початку гри не може бути в минулому"
+        }
+        if (!maxParticipants || Number(maxParticipants) < 2) {
+            errors.maxParticipants = "Кількість гравців має бути не менше 2"
+        }
+
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors)
             return
         }
-        if (!title || !sportType || !startsAt || !maxParticipants) {
-            setError('Будь ласка, вкажіть усі необхідні дані')
-            setLoading(false)
-            return
-        }
+
+        setFieldErrors({})
+        setLoading(true)
 
         try {
             const res = await createGameAction({
-                sport_type: sportType,
-                title: title.trim(),
-                location_text: finalLocation,
-                starts_at: startsAt,
+                sport_type: sportType!,
+                title: title!.trim(),
+                location_text: finalLocation!,
+                starts_at: startsAt!,
                 max_participants: Number(maxParticipants),
                 is_public: isPublic
             })
@@ -139,6 +163,7 @@ export const CreateGameModal: React.FC<PropsType> = ({ isOpen, onClose }) => {
                     setMaxParticipants(10)
                     setIsPublic(true)
                     setSuccess(null)
+                    setFieldErrors({})
                 }, 1500)
             }
         } catch {
@@ -159,36 +184,46 @@ export const CreateGameModal: React.FC<PropsType> = ({ isOpen, onClose }) => {
 
                 <h2 className={styles.modalTitle}>Створити гру</h2>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form noValidate onSubmit={handleSubmit} className={styles.form}>
                     {error && <div className={styles.errorAlert}>{error}</div>}
                     {success && <div className={styles.successAlert}>{success}</div>}
 
                     <Combobox
                         label="Вид спорту"
                         value={sportType}
-                        onChange={(val) => handleSportChange(val as SportType)}
+                        onChange={(val) => {
+                            setFieldErrors(prev => ({ ...prev, sportType: undefined }))
+                            handleSportChange(val as SportType)
+                        }}
                         options={sportOptions}
+                        error={fieldErrors.sportType}
                         required
                     />
 
                     <Input
                         label="Назва гри"
                         type="text"
-                        value={title}
+                        value={title || ''}
                         onChange={(e) => {
                             setTitle(e.target.value)
                             setIsTitleDirty(true)
+                            setFieldErrors(prev => ({ ...prev, title: undefined }))
                         }}
                         placeholder="Наприклад: Вечірній футбол"
+                        error={fieldErrors.title}
                         required
                     />
 
                     <Combobox
                         label="Місце проведення"
                         value={selectedLocation}
-                        onChange={handleLocationChange}
+                        onChange={(val) => {
+                            setFieldErrors(prev => ({ ...prev, selectedLocation: undefined }))
+                            handleLocationChange(val)
+                        }}
                         options={locationOptions}
                         placeholder="Оберіть місце або введіть нове..."
+                        error={fieldErrors.selectedLocation}
                         required
                     />
 
@@ -196,16 +231,24 @@ export const CreateGameModal: React.FC<PropsType> = ({ isOpen, onClose }) => {
                         <Input
                             label="Час початку"
                             type="datetime-local"
-                            value={startsAt}
-                            onChange={(e) => setStartsAt(e.target.value)}
+                            value={startsAt || ''}
+                            onChange={(e) => {
+                                setStartsAt(e.target.value)
+                                setFieldErrors(prev => ({ ...prev, startsAt: undefined }))
+                            }}
+                            error={fieldErrors.startsAt}
                             required
                         />
                         <Input
                             label="Кількість гравців"
                             type="number"
-                            value={maxParticipants}
-                            onChange={(e) => setMaxParticipants(Number(e.target.value))}
+                            value={maxParticipants || ''}
+                            onChange={(e) => {
+                                setMaxParticipants(Number(e.target.value))
+                                setFieldErrors(prev => ({ ...prev, maxParticipants: undefined }))
+                            }}
                             min="2"
+                            error={fieldErrors.maxParticipants}
                             required
                         />
                     </div>
