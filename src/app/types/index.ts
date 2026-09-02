@@ -10,7 +10,7 @@ export interface GameType {
   id: string;
   created_at: string;
   organizer_id: string;
-  sport_type: SportType;
+  sport: SportType;
   title: string;
   location_text: string;
   starts_at: string;
@@ -34,4 +34,10 @@ export interface UserType {
   id?: string;
   email?: string | null;
   user_metadata?: UserMetadataType;
+}
+
+export type MyGameRole = 'organizer' | 'participant';
+
+export interface MyGameType extends GameType {
+  userRole: MyGameRole;
 }

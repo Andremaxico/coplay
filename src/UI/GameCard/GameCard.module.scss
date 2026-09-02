@@ -16,6 +16,53 @@
     border-color: var(--surface-hover);
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
   }
+
+  &.inactive {
+    opacity: 0.65;
+    background: rgba(245, 247, 250, 0.6);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: none;
+
+    &:hover {
+      transform: none;
+      border-color: rgba(0, 0, 0, 0.08);
+      box-shadow: none;
+    }
+
+    .sportsIcon {
+      background: rgba(0, 0, 0, 0.04);
+      border-color: rgba(0, 0, 0, 0.08);
+      color: #718096;
+    }
+
+    .avatar {
+      border-color: #cbd5e0;
+    }
+
+    .name {
+      color: #718096;
+    }
+
+    .location, .time {
+      color: #718096;
+
+      svg {
+        color: #a0aec0;
+      }
+    }
+
+    .progressText {
+      color: #718096;
+
+      svg {
+        color: #a0aec0;
+      }
+    }
+
+    .progressFill {
+      background: #cbd5e0;
+    }
+  }
 }
 
 .header {
@@ -193,5 +240,18 @@
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
     box-shadow: none !important;
     cursor: not-allowed;
+  }
+
+  &.past {
+    background-color: rgba(0, 0, 0, 0.06) !important;
+    color: #718096 !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
   }
 }

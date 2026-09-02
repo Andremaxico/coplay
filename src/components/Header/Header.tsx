@@ -3,8 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { CoPlayLogo } from '@/UI/CoPlayLogo/CoPlayLogo'
 import styles from './Header.module.scss'
 import { HeaderProfile } from './HeaderProfile/HeaderProfile'
+import { HeaderNav } from './HeaderNav/HeaderNav'
 
-export async function Header() {
+export const Header = async () => {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -14,7 +15,8 @@ export async function Header() {
         <CoPlayLogo />
       </Link>
 
-      <div className={styles.accountWrapper}>
+      <div className={styles.rightSection}>
+        <HeaderNav />
         <HeaderProfile user={user} />
       </div>
     </header>

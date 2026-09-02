@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import styles from './GameCard.module.scss'
-import { GameType } from '@/app/types'
+import { GameType, SportType } from '@/app/types'
 import { Button } from '../Button/Button'
 import {
     FootballIcon,
@@ -23,19 +23,28 @@ import { createClient } from '@/lib/supabase/client'
 
 type PropsType = {
     game: GameType
+    isInactive?: boolean
 }
 
-function getSportIcon(sport: string) {
-    switch (sport) {
-        case 'football': return <FootballIcon />
-        case 'basketball': return <BasketballIcon />
-        case 'volleyball': return <VolleyballIcon />
-        case 'tennis': return <TennisIcon />
-        default: return <SportGenericIcon />
+const getSportIcon = (sport: SportType) => {
+    console.log('sport', sport)
+    if (!sport) return <SportGenericIcon />
+    const normalized = sport.toLowerCase().trim()
+    switch (normalized) {
+        case 'football':
+            return <FootballIcon />
+        case 'basketball':
+            return <BasketballIcon />
+        case 'volleyball':
+            return <VolleyballIcon />
+        case 'tennis':
+            return <TennisIcon />
+        default:
+            return <SportGenericIcon />
     }
 }
 
-function formatDateTime(dateStr: string) {
+const formatDateTime = (dateStr: string) => {
     if (!dateStr) return ''
     try {
         const date = new Date(dateStr)
@@ -63,7 +72,7 @@ function formatDateTime(dateStr: string) {
     }
 }
 
-export const GameCard: React.FC<PropsType> = ({ game }) => {
+export const GameCard: React.FC<PropsType> = ({ game, isInactive }) => {
     const router = useRouter()
     const openLogin = useModalStore((state) => state.openLogin)
 
@@ -71,10 +80,12 @@ export const GameCard: React.FC<PropsType> = ({ game }) => {
     const [hasJoined, setHasJoined] = useState(false)
     const [organizerProfile, setOrganizerProfile] = useState(game.organizer)
 
+    console.log('game data', game)
+
     const {
         id,
         title,
-        sport_type,
+        sport,
         location_text,
         starts_at,
         max_participants,
@@ -82,9 +93,14 @@ export const GameCard: React.FC<PropsType> = ({ game }) => {
         organizer_id
     } = game
 
+    const isPast = isInactive !== undefined
+        ? isInactive
+        : (starts_at ? new Date(starts_at).getTime() < Date.now() : false)
+
     useEffect(() => {
+        const supabase = createClient()
+
         if (!organizerProfile && organizer_id) {
-            const supabase = createClient()
             supabase
                 .from('profiles')
                 .select('first_name, avatar_url')
@@ -96,13 +112,31 @@ export const GameCard: React.FC<PropsType> = ({ game }) => {
                     }
                 })
         }
-    }, [organizer_id, organizerProfile])
 
-    const currentCount = hasJoined ? (current_participants || 1) + 1 : (current_participants || 1)
+        supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) {
+                if (user.id === organizer_id) {
+                    setHasJoined(true)
+                } else {
+                    supabase
+                        .from('game_participants')
+                        .select('id')
+                        .eq('game_id', id)
+                        .eq('user_id', user.id)
+                        .maybeSingle()
+                        .then(({ data }) => {
+                            if (data) setHasJoined(true)
+                        })
+                }
+            }
+        })
+    }, [id, organizer_id, organizerProfile])
+
+    const currentCount = current_participants || 1
     const isFull = currentCount >= max_participants
 
     const handleJoin = async () => {
-        if (hasJoined || isFull || loading) return
+        if (isPast || hasJoined || isFull || loading) return
 
         setLoading(true)
         try {
@@ -134,10 +168,10 @@ export const GameCard: React.FC<PropsType> = ({ game }) => {
     const percent = Math.min(100, Math.round((currentCount / max_participants) * 100))
 
     return (
-        <div className={styles.GameCard}>
+        <div className={`${styles.GameCard} ${isPast ? styles.inactive : ''}`}>
             <div className={styles.header}>
                 <div className={styles.sportsIcon}>
-                    {getSportIcon(sport_type)}
+                    {getSportIcon(sport)}
                 </div>
                 <h3>{title}</h3>
             </div>
@@ -185,11 +219,13 @@ export const GameCard: React.FC<PropsType> = ({ game }) => {
                         type="button"
                         variant="primary"
                         onClick={handleJoin}
-                        disabled={loading || (isFull && !hasJoined)}
-                        className={`${styles.participate_btn} ${hasJoined ? styles.joined : ''} ${isFull && !hasJoined ? styles.full : ''}`}
+                        disabled={loading || isPast || (isFull && !hasJoined)}
+                        className={`${styles.participate_btn} ${isPast ? styles.past : ''} ${hasJoined && !isPast ? styles.joined : ''} ${isFull && !hasJoined && !isPast ? styles.full : ''}`}
                     >
                         {loading ? (
                             'Обробка...'
+                        ) : isPast ? (
+                            'Завершено'
                         ) : hasJoined ? (
                             <>
                                 <CheckIcon /> У грі
