@@ -263,7 +263,7 @@ export const CreateGameModal: React.FC<PropsType> = ({ isOpen, onClose }) => {
                         <span>Публічна гра (видно всім)</span>
                     </label>
 
-                    <Button type="submit" variant="secondary" disabled={loading} className={styles.submitBtn}>
+                    <Button type="submit" variant="primary" disabled={loading} className={styles.submitBtn}>
                         {loading ? 'Створення...' : 'Створити'}
                     </Button>
                 </form>

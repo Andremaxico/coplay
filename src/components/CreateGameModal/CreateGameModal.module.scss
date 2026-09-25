@@ -88,9 +88,9 @@
 }
 
 .successAlert {
-  background-color: rgba($secondary, 0.1);
-  border: 1px solid rgba($secondary, 0.2);
-  color: $secondary;
+  background-color: rgba($primary, 0.1);
+  border: 1px solid rgba($primary, 0.2);
+  color: $primary;
   font-size: 13px;
   padding: 0.75rem 1rem;
   border-radius: 8px;
@@ -131,7 +131,7 @@
     height: 18px;
     border-radius: 4px;
     border: 1px solid $border;
-    accent-color: $secondary;
+    accent-color: $primary;
     cursor: pointer;
   }
 }
@@ -139,4 +139,6 @@
 .submitBtn {
   width: 100%;
   margin-top: 0.5rem;
+  padding: 10px 20px;
+  font-size: 15px;
 }
