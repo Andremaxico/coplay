@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 .btn {
   font-family: inherit;
   border: 1px solid transparent;
@@ -18,12 +20,12 @@
   font-size: 14px;
   font-weight: 600;
   color: #ffffff;
-  background-color: var(--primary);
-  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.2);
+  background-color: $primary;
+  box-shadow: 0 4px 12px rgba($primary, 0.2);
 
   &:hover {
     background-color: #ff3333;
-    box-shadow: 0 4px 18px rgba(255, 0, 0, 0.35);
+    box-shadow: 0 4px 18px rgba($primary, 0.35);
     transform: translateY(-1px);
   }
 
@@ -37,12 +39,12 @@
   font-size: 15px;
   font-weight: 600;
   color: #ffffff;
-  background-color: var(--secondary);
-  box-shadow: 0 4px 12px rgba(255, 153, 0, 0.2);
+  background-color: $secondary;
+  box-shadow: 0 4px 12px rgba($secondary, 0.2);
 
   &:hover {
     background-color: #ffaa33;
-    box-shadow: 0 4px 18px rgba(255, 153, 0, 0.35);
+    box-shadow: 0 4px 18px rgba($secondary, 0.35);
     transform: translateY(-1px);
   }
 }
@@ -63,10 +65,10 @@
 
 .ghost {
   background: transparent;
-  color: var(--text-body);
+  color: $text-body;
   
   &:hover {
-    color: var(--foreground);
-    background-color: rgba(255, 255, 255, 0.05);
+    color: $foreground;
+    background-color: rgba($foreground, 0.05);
   }
 }

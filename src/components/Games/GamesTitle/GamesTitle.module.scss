@@ -1,7 +1,9 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
 .title {
   text-align: center;
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--background);
+  color: $background;
   margin-bottom: 2rem;
 }

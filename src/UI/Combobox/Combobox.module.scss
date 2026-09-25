@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 .field {
   display: flex;
   flex-direction: column;
@@ -9,7 +11,7 @@
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--foreground);
+  color: $foreground;
 }
 
 .inputWrapper {
@@ -21,18 +23,18 @@
   padding: 0.75rem 2.5rem 0.75rem 1rem;
   font-family: inherit;
   font-size: 14px;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border);
+  background-color: rgba($foreground, 0.02);
+  border: 1px solid $border;
   border-radius: 8px;
-  color: var(--foreground);
+  color: $foreground;
   transition: all 0.2s ease-in-out;
   box-sizing: border-box;
   width: 100%;
 
   &:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 8px rgba(255, 0, 0, 0.15);
+    border-color: $primary;
+    box-shadow: 0 0 8px rgba($primary, 0.15);
   }
 
   &.hasError {
@@ -76,7 +78,7 @@
   transform: translateY(-50%);
   background: transparent;
   border: none;
-  color: var(--text-body);
+  color: $text-body;
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -87,7 +89,7 @@
 
   &:hover {
     opacity: 1;
-    color: var(--foreground);
+    color: $foreground;
   }
 
   &.open {
@@ -102,10 +104,10 @@
   width: 100%;
   max-height: 200px;
   overflow-y: auto;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+  background-color: $surface;
+  border: 1px solid $border;
   border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 25px rgba(#000000, 0.35);
   z-index: 1010;
   margin: 0;
   padding: 4px;
@@ -116,7 +118,7 @@
 .option {
   padding: 8px 12px;
   font-size: 13px;
-  color: var(--text-body);
+  color: $text-body;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -126,37 +128,37 @@
   text-overflow: ellipsis;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--foreground);
+    background-color: rgba($foreground, 0.05);
+    color: $foreground;
   }
 
   &.focused {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: var(--foreground);
+    background-color: rgba($foreground, 0.08);
+    color: $foreground;
   }
 
   &.selected {
     background-color: rgba(0, 229, 255, 0.1);
-    color: var(--primary);
+    color: $primary;
     font-weight: 500;
   }
 }
 
 .customVal {
-  color: var(--secondary);
+  color: $secondary;
   font-style: italic;
   font-weight: 500;
 
   &:hover {
-    background-color: rgba(255, 153, 0, 0.08);
-    color: var(--secondary);
+    background-color: rgba($secondary, 0.08);
+    color: $secondary;
   }
 }
 
 .noOptions {
   padding: 8px 12px;
   font-size: 13px;
-  color: var(--text-body);
+  color: $text-body;
   opacity: 0.5;
   font-style: italic;
   user-select: none;

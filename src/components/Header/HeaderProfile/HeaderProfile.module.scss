@@ -1,3 +1,5 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
 .container {
   display: flex;
   align-items: center;
@@ -10,7 +12,7 @@
 
 .email {
   font-size: 14px;
-  color: var(--text-body);
+  color: $text-body;
   display: none;
 
   @media (min-width: 600px) {
@@ -21,7 +23,7 @@
 .iconBtn {
   background: transparent;
   border: none;
-  color: var(--text-title);
+  color: $text-title;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -32,8 +34,8 @@
   outline: none;
 
   &:hover {
-    color: var(--primary);
-    background-color: rgba(255, 255, 255, 0.05);
+    color: $primary;
+    background-color: rgba($foreground, 0.05);
     transform: scale(1.05);
   }
 
@@ -43,7 +45,7 @@
 }
 
 .createGameButton {
-  background-color: var(--primary);
+  background-color: $primary;
   color: white;
   padding: 10px 18px;
   border-radius: 12px;
@@ -55,24 +57,24 @@
 
   &:hover {
     background-color: #ff3333;
-    box-shadow: 0 4px 14px rgba(255, 0, 0, 0.35);
+    box-shadow: 0 4px 14px rgba($primary, 0.35);
     transform: translateY(-1px);
   }
 
   &:focus-visible {
-    box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.4);
+    box-shadow: 0 0 0 3px rgba($primary, 0.4);
     background-color: #ff3333;
   }
 
   &:active {
     background-color: #cc0000;
     transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(255, 0, 0, 0.2);
+    box-shadow: 0 2px 8px rgba($primary, 0.2);
   }
 }
 
 .profileLink {
-  color: var(--text-title);
+  color: $text-title;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -81,8 +83,8 @@
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    color: var(--primary);
-    background-color: rgba(255, 255, 255, 0.05);
+    color: $primary;
+    background-color: rgba($foreground, 0.05);
     transform: scale(1.05);
   }
 
@@ -108,19 +110,19 @@
   height: 22px;
   border-radius: 50%;
   object-fit: cover;
-  border: 1px solid var(--border);
+  border: 1px solid $border;
 }
 
 .profileDropdown {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+  background-color: $surface;
+  border: 1px solid $border;
   border-radius: 16px;
   padding: 1.25rem;
   min-width: 280px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 30px rgba(#000000, 0.45);
   z-index: 100;
   opacity: 0;
   visibility: hidden;
@@ -139,7 +141,7 @@
 .warningText {
   font-size: 13px;
   line-height: 1.4;
-  color: var(--text-body);
+  color: $text-body;
   opacity: 0.8;
   margin: 0;
 }
@@ -151,7 +153,7 @@
   font-size: 13px;
   font-weight: 600;
   color: white;
-  background-color: var(--primary);
+  background-color: $primary;
   border-radius: 8px;
   border: none;
   cursor: pointer;
@@ -159,6 +161,6 @@
 
   &:hover {
     background-color: #ff3333;
-    box-shadow: 0 4px 10px rgba(255, 0, 0, 0.25);
+    box-shadow: 0 4px 10px rgba($primary, 0.25);
   }
 }

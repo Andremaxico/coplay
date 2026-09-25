@@ -1,8 +1,10 @@
+@use "../styles/variables" as *;
+@use "../styles/mixins" as *;
 .main {
   max-width: 1180px;
   min-height: 100vh;
   box-sizing: border-box;
-  padding: calc(var(--header-height) + 16px) 1rem 16px 1rem;
+  padding: calc($header-height + 16px) 1rem 16px 1rem;
   margin: 0 auto;
 }
 
@@ -15,7 +17,7 @@
 
 .subtitle {
   font-size: 1.125rem;
-  color: var(--text-body);
+  color: $text-body;
   margin-bottom: 3rem;
   max-width: 500px;
   line-height: 1.6;

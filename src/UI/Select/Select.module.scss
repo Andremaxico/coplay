@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 .field {
   display: flex;
   flex-direction: column;
@@ -8,17 +10,17 @@
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--foreground);
+  color: $foreground;
 }
 
 .select {
   padding: 0.75rem 1rem;
   font-family: inherit;
   font-size: 14px;
-  background-color: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border);
+  background-color: rgba($foreground, 0.02);
+  border: 1px solid $border;
   border-radius: 8px;
-  color: var(--foreground);
+  color: $foreground;
   transition: all 0.2s ease-in-out;
   box-sizing: border-box;
   width: 100%;
@@ -26,8 +28,8 @@
 
   &:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 8px rgba(255, 0, 0, 0.15);
+    border-color: $primary;
+    box-shadow: 0 0 8px rgba($primary, 0.15);
   }
 
   &.hasError {
@@ -41,8 +43,8 @@
   }
 
   option {
-    background-color: var(--surface);
-    color: var(--foreground);
+    background-color: $surface;
+    color: $foreground;
   }
 }
 

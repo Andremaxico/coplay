@@ -1,3 +1,5 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
 .modalOverlay {
   position: fixed;
   top: 0;
@@ -15,13 +17,13 @@
 }
 
 .modalContent {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+  background-color: $surface;
+  border: 1px solid $border;
   border-radius: 16px;
   width: 100%;
   max-width: 480px;
   padding: 2.5rem 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 20px 40px rgba(#000000, 0.4);
   position: relative;
   box-sizing: border-box;
   animation: modalEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -44,7 +46,7 @@
   right: 1rem;
   background: transparent;
   border: none;
-  color: var(--text-title);
+  color: $text-title;
   cursor: pointer;
   padding: 4px;
   border-radius: 50%;
@@ -63,7 +65,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0 0 1.5rem 0;
-  background: linear-gradient(135deg, var(--foreground), var(--text-title));
+  background: linear-gradient(135deg, $foreground, $text-title);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -86,9 +88,9 @@
 }
 
 .successAlert {
-  background-color: rgba(255, 153, 0, 0.1);
-  border: 1px solid rgba(255, 153, 0, 0.2);
-  color: var(--secondary);
+  background-color: rgba($secondary, 0.1);
+  border: 1px solid rgba($secondary, 0.2);
+  color: $secondary;
   font-size: 13px;
   padding: 0.75rem 1rem;
   border-radius: 8px;
@@ -121,15 +123,15 @@
   cursor: pointer;
   user-select: none;
   font-size: 14px;
-  color: var(--text-body);
+  color: $text-body;
   margin-top: 0.25rem;
 
   .checkbox {
     width: 18px;
     height: 18px;
     border-radius: 4px;
-    border: 1px solid var(--border);
-    accent-color: var(--secondary);
+    border: 1px solid $border;
+    accent-color: $secondary;
     cursor: pointer;
   }
 }
