@@ -2,9 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { GameType, MyGameType, SportType } from '../types'
+import { GameType, MyGameType, OrganizerType, SportType } from '../types'
 
-export type GameModel = Omit<GameType, 'id' | 'created_at'>;
+export type GameModel = Omit<GameType, 'id' | 'created_at' | 'current_participants' | 'organizer'>;
 
 export const createGame = async (formData: FormData) => {
     const supabase = await createClient()
@@ -12,12 +12,12 @@ export const createGame = async (formData: FormData) => {
 
     if (!user) throw new Error('Unauthorized')
 
-    const gameData = {
+    const gameData: GameModel = {
         organizer_id: user.id,
-        sport_type: formData.get('sport_type'),
-        title: formData.get('title'),
-        location_text: formData.get('location_text'), // Поки без Google Places, просто текст (напр. "Орлик на Ратаях")
-        starts_at: formData.get('starts_at'),
+        sport: (formData.get('sport_type') as SportType) || 'football',
+        title: String(formData.get('title') || ''),
+        location_text: String(formData.get('location_text') || ''),
+        starts_at: String(formData.get('starts_at') || ''),
         max_participants: Number(formData.get('max_participants')),
         is_public: formData.get('is_public') === 'true',
     }
@@ -63,11 +63,14 @@ export const joinGameAction = async (gameId: string) => {
 export const getGames = async () => {
     const supabase = await createClient()
 
+    const nowIso = new Date().toISOString()
+
     const { data: games, error } = await supabase
         .from('games')
         .select('*')
+        .gte('starts_at', nowIso)
         .order('starts_at', { ascending: true })
-        .limit(20)
+        .limit(50)
 
     if (error) {
         console.error('Error fetching games:', error)
@@ -76,28 +79,40 @@ export const getGames = async () => {
 
     if (!games || games.length === 0) return []
 
-    // Fetch organizer profiles using organizer_id
-    const organizerIds = Array.from(new Set(games.map(g => g.organizer_id).filter(Boolean)))
+    // Ensure double-check in JS so any passed game is excluded from the main feed
+    const nowTime = Date.now()
+    const activeGames = games.filter(g => {
+        if (!g.starts_at) return false
+        return new Date(g.starts_at).getTime() >= nowTime
+    })
 
-    const profilesMap: Record<string, { first_name?: string; avatar_url?: string }> = {}
+    if (activeGames.length === 0) return []
+
+    // Fetch organizer profiles using organizer_id
+    const organizerIds = Array.from(new Set(activeGames.map(g => g.organizer_id).filter(Boolean)))
+
+    const profilesMap: Record<string, OrganizerType> = {}
 
     if (organizerIds.length > 0) {
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('id, first_name, avatar_url')
+            .select('id, first_name, last_name, avatar_url, telegram, phone')
             .in('id', organizerIds)
 
         if (profiles) {
             profiles.forEach(p => {
                 profilesMap[p.id] = {
                     first_name: p.first_name,
-                    avatar_url: p.avatar_url
+                    last_name: p.last_name,
+                    avatar_url: p.avatar_url,
+                    telegram: p.telegram,
+                    phone: p.phone,
                 }
             })
         }
     }
 
-    const gamesWithOrganizers = games.map(game => ({
+    const gamesWithOrganizers = activeGames.map(game => ({
         ...game,
         organizer: profilesMap[game.organizer_id] || undefined
     }))
@@ -130,12 +145,22 @@ export const createGameAction = async (data: {
     starts_at: string
     max_participants: number
     is_public?: boolean
+    contact_telegram?: string
+    contact_phone?: string
 }) => {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
         return { error: 'Неавторизовано' }
+    }
+
+    // Require at least one contact method
+    const tg = data.contact_telegram?.trim() || ''
+    const ph = data.contact_phone?.trim() || ''
+
+    if (!tg && !ph) {
+        return { error: "Будь ласка, вкажіть хоча б один спосіб зв'язку (Telegram або Телефон/WhatsApp)" }
     }
 
     const { data: createdGame, error } = await supabase.from('games').insert<GameModel>({
@@ -146,7 +171,6 @@ export const createGameAction = async (data: {
         starts_at: data.starts_at,
         max_participants: data.max_participants,
         is_public: data.is_public ?? true,
-        current_participants: 1,
     }).select('id').single()
 
     if (error) {
@@ -165,6 +189,46 @@ export const createGameAction = async (data: {
         if (partError) {
             console.error('Error adding creator to game_participants:', partError)
         }
+    }
+
+    // Synchronize contacts with organizer profile
+    try {
+        const updates: Record<string, any> = {
+            updated_at: new Date().toISOString(),
+        }
+        if (tg) updates.telegram = tg
+        if (ph) updates.phone = ph
+
+        const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle()
+
+        if (existingProfile) {
+            await supabase.from('profiles').update(updates).eq('id', user.id)
+        } else {
+            await supabase.from('profiles').insert({
+                id: user.id,
+                first_name: user.user_metadata?.first_name || 'Організатор',
+                last_name: user.user_metadata?.last_name || null,
+                avatar_url: user.user_metadata?.avatar_url || null,
+                telegram: tg || null,
+                phone: ph || null,
+                updated_at: new Date().toISOString(),
+            })
+        }
+
+        // Also update auth user metadata
+        await supabase.auth.updateUser({
+            data: {
+                ...user.user_metadata,
+                ...(tg && { telegram: tg }),
+                ...(ph && { phone: ph }),
+            }
+        })
+    } catch (profileErr) {
+        console.error('Error updating organizer profile contacts:', profileErr)
     }
 
     revalidatePath('/')
@@ -219,19 +283,22 @@ export const getMyGames = async (): Promise<{ upcoming: MyGameType[]; past: MyGa
     ]
 
     const organizerIds = Array.from(new Set(myGames.map(g => g.organizer_id).filter(Boolean)))
-    const profilesMap: Record<string, { first_name?: string; avatar_url?: string }> = {}
+    const profilesMap: Record<string, OrganizerType> = {}
 
     if (organizerIds.length > 0) {
         const { data: profiles } = await supabase
             .from('profiles')
-            .select('id, first_name, avatar_url')
+            .select('id, first_name, last_name, avatar_url, telegram, phone')
             .in('id', organizerIds)
 
         if (profiles) {
             profiles.forEach(p => {
                 profilesMap[p.id] = {
                     first_name: p.first_name,
-                    avatar_url: p.avatar_url
+                    last_name: p.last_name,
+                    avatar_url: p.avatar_url,
+                    telegram: p.telegram,
+                    phone: p.phone,
                 }
             })
         }

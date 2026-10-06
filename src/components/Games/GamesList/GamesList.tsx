@@ -1,8 +1,8 @@
 import styles from './GamesList.module.scss'
 import { getGames } from '@/app/actions/games'
-import { GamesCard } from './GamesCard/GamesCard'
 import { NoGames } from '@/UI/NoGames/NoGames'
 import { ErrorMessage } from '@/UI/ErrorMessage/ErrorMessage'
+import { GameCard } from '@/UI/GameCard/GameCard'
 
 export const GamesList = async () => {
 
@@ -14,11 +14,9 @@ export const GamesList = async () => {
 
     return (
         <div className={styles.GamesList}>
-            <div className={styles.grid}>
-                {gamesData.map((game) => (
-                    <GamesCard key={game.id} game={game} />
-                ))}
-            </div>
+            {gamesData.map((game) => (
+                <GameCard key={game.id} game={game} />
+            ))}
         </div>
     )
 }

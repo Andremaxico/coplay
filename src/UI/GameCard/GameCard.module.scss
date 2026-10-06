@@ -64,6 +64,11 @@
     .progressFill {
       background: #cbd5e0;
     }
+
+    .telegramLink, .whatsappLink {
+      opacity: 0.65;
+      filter: grayscale(30%);
+    }
   }
 }
 
@@ -99,12 +104,21 @@
   }
 }
 
-/* Організатор: ТІЛЬКИ фото і ім'я */
+/* Організатор та контакти */
 .organizator_info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
   padding: 4px 0;
+  flex-wrap: wrap;
+}
+
+.organizerProfile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
 }
 
 .avatar {
@@ -138,6 +152,73 @@
   font-size: 14px;
   font-weight: 600;
   color: #2d3748;
+}
+
+.contacts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.telegramLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(#229ed9, 0.1);
+  border: 1px solid rgba(#229ed9, 0.25);
+  color: #0088cc;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: #229ed9;
+    color: #ffffff;
+    border-color: #229ed9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(#229ed9, 0.3);
+  }
+}
+
+.whatsappLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(#25d366, 0.1);
+  border: 1px solid rgba(#25d366, 0.25);
+  color: #128c7e;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+
+  svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+  }
+
+  &:hover {
+    background: #25d366;
+    color: #ffffff;
+    border-color: #25d366;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(#25d366, 0.3);
+  }
 }
 
 .info {

@@ -1,14 +1,28 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
 import { updateProfileMetadata } from '@/app/actions/auth'
 import { SportType, UserType } from '@/app/types'
 import { Button } from '@/UI/Button/Button'
 import { Input } from '@/UI/Input/Input'
 import { Select } from '@/UI/Select/Select'
 import { CloseIcon } from '@/UI/Icons/Icons'
+import { useAvatarCrop } from '@/app/hooks'
 import styles from './ProfileEditModal.module.scss'
+
+const profileEditSchema = z.object({
+    first_name: z.string().trim().min(1, "Введіть ім'я"),
+    last_name: z.string().trim().min(1, "Введіть прізвище"),
+    phone: z.string().trim().min(1, "Введіть номер телефону"),
+    telegram: z.string().trim().optional(),
+    main_sport: z.enum(['football', 'basketball', 'volleyball', 'tennis', 'other']),
+})
+
+type ProfileEditFormValues = z.infer<typeof profileEditSchema>
 
 type PropsType = {
     user: UserType | null
@@ -18,161 +32,52 @@ type PropsType = {
 
 export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose }) => {
     const router = useRouter()
-    
-    // Form fields initialized directly from user prop
-    const [firstName, setFirstName] = useState(user?.user_metadata?.first_name || '')
-    const [lastName, setLastName] = useState(user?.user_metadata?.last_name || '')
-    const [phone, setPhone] = useState(user?.user_metadata?.phone || '')
-    const [telegram, setTelegram] = useState(user?.user_metadata?.telegram || '')
-    const [mainSport, setMainSport] = useState<SportType>((user?.user_metadata?.main_sport as SportType) || 'football')
-    
-    // Image cropping states
-    const [imageSrc, setImageSrc] = useState<string | null>(user?.user_metadata?.avatar_url || user?.user_metadata?.avatar_data || null)
-    const [zoom, setZoom] = useState(1)
-    const [xOffset, setXOffset] = useState(0)
-    const [yOffset, setYOffset] = useState(0)
-    
-    // Interactive drag and touch state
-    const [isDragging, setIsDragging] = useState(false)
-    const dragStart = useRef({ x: 0, y: 0 })
-    const offsetStart = useRef({ x: 0, y: 0 })
-    const lastTouchDistance = useRef<number | null>(null)
-    
-    // Status
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm<ProfileEditFormValues>({
+        resolver: zodResolver(profileEditSchema),
+        defaultValues: {
+            first_name: user?.user_metadata?.first_name || '',
+            last_name: user?.user_metadata?.last_name || '',
+            phone: user?.user_metadata?.phone || '',
+            telegram: user?.user_metadata?.telegram || '',
+            main_sport: (user?.user_metadata?.main_sport as SportType) || 'football',
+        },
+    })
+
+    // Custom hook encapsulating image cropping, drag & zoom mechanics
+    const {
+        imageSrc,
+        zoom,
+        xOffset,
+        yOffset,
+        isDragging,
+        fileInputRef,
+        handleFileChange,
+        triggerFileSelect,
+        handleTouchStart,
+        handleTouchMove,
+        handleTouchEnd,
+        handleMouseDown,
+        handleMouseMove,
+        handleMouseUpOrLeave,
+        handleWheel,
+        cropImage,
+    } = useAvatarCrop({
+        initialAvatar: user?.user_metadata?.avatar_url || user?.user_metadata?.avatar_data,
+    })
+
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
-    const [loading, setLoading] = useState(false)
-    
-    const fileInputRef = useRef<HTMLInputElement>(null)
 
     if (!isOpen) return null
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (file) {
-            const reader = new FileReader()
-            reader.onload = () => {
-                setImageSrc(reader.result as string)
-                setZoom(1)
-                setXOffset(0)
-                setYOffset(0)
-            }
-            reader.readAsDataURL(file)
-        }
-    }
-
-    const triggerFileSelect = () => {
-        fileInputRef.current?.click()
-    }
-
-    // Touch handlers for mobile devices
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (e.touches.length === 2) {
-            setIsDragging(false)
-            const touch1 = e.touches[0]
-            const touch2 = e.touches[1]
-            lastTouchDistance.current = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY)
-        } else if (e.touches.length === 1) {
-            setIsDragging(true)
-            dragStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-            offsetStart.current = { x: xOffset, y: yOffset }
-        }
-    }
-
-    const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (e.touches.length === 2) {
-            const touch1 = e.touches[0]
-            const touch2 = e.touches[1]
-            const dist = Math.hypot(touch2.clientX - touch1.clientX, touch2.clientY - touch1.clientY)
-            
-            if (lastTouchDistance.current !== null) {
-                const delta = dist - lastTouchDistance.current
-                const zoomFactor = delta * 0.015
-                setZoom(prev => Math.max(1, Math.min(5, prev + zoomFactor)))
-            }
-            lastTouchDistance.current = dist
-        } else if (e.touches.length === 1 && isDragging) {
-            const clientX = e.touches[0].clientX
-            const clientY = e.touches[0].clientY
-            const dx = clientX - dragStart.current.x
-            const dy = clientY - dragStart.current.y
-            setXOffset(offsetStart.current.x + dx)
-            setYOffset(offsetStart.current.y + dy)
-        }
-    }
-
-    const handleTouchEnd = () => {
-        setIsDragging(false)
-        lastTouchDistance.current = null
-    }
-
-    // Mouse handlers for desktop browser drag-to-move
-    const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-        e.preventDefault()
-        setIsDragging(true)
-        dragStart.current = { x: e.clientX, y: e.clientY }
-        offsetStart.current = { x: xOffset, y: yOffset }
-    }
-
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!isDragging) return
-        const dx = e.clientX - dragStart.current.x
-        const dy = e.clientY - dragStart.current.y
-        setXOffset(offsetStart.current.x + dx)
-        setYOffset(offsetStart.current.y + dy)
-    }
-
-    const handleMouseUpOrLeave = () => {
-        setIsDragging(false)
-    }
-
-    // Mouse wheel handler to zoom
-    const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
-        const zoomStep = 0.08
-        const direction = e.deltaY < 0 ? 1 : -1
-        setZoom(prev => Math.max(1, Math.min(5, prev + direction * zoomStep)))
-    }
-
-    const cropImage = (): Promise<string> => {
-        return new Promise((resolve) => {
-            if (!imageSrc) return resolve('')
-
-            const canvas = document.createElement('canvas')
-            canvas.width = 150
-            canvas.height = 150
-            const ctx = canvas.getContext('2d')
-            if (!ctx) return resolve('')
-
-            const img = new Image()
-            img.src = imageSrc
-            img.onload = () => {
-                ctx.clearRect(0, 0, 150, 150)
-                
-                // Circular clip
-                ctx.beginPath()
-                ctx.arc(75, 75, 75, 0, Math.PI * 2)
-                ctx.clip()
-                
-                const drawWidth = 150 * zoom
-                const drawHeight = (img.height / img.width) * drawWidth
-                
-                const dx = 75 - drawWidth / 2 + xOffset
-                const dy = 75 - drawHeight / 2 + yOffset
-                
-                ctx.drawImage(img, dx, dy, drawWidth, drawHeight)
-                resolve(canvas.toDataURL('image/jpeg', 0.5))
-            }
-            img.onerror = () => {
-                resolve(imageSrc)
-            }
-        })
-    }
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const onSubmit = async (data: ProfileEditFormValues) => {
         setError(null)
         setSuccess(null)
-        setLoading(true)
 
         try {
             let croppedAvatar = imageSrc
@@ -182,11 +87,11 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
 
             const res = await updateProfileMetadata({
                 avatar_data: croppedAvatar || undefined,
-                first_name: firstName,
-                last_name: lastName,
-                phone: phone,
-                telegram: telegram || undefined,
-                main_sport: mainSport
+                first_name: data.first_name,
+                last_name: data.last_name,
+                phone: data.phone,
+                telegram: data.telegram || undefined,
+                main_sport: data.main_sport,
             })
 
             if (res?.error) {
@@ -197,12 +102,10 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
                 setTimeout(() => {
                     onClose()
                     setSuccess(null)
-                }, 1500)
+                }, 1200)
             }
         } catch {
             setError('Виникла помилка при оновленні профілю')
-        } finally {
-            setLoading(false)
         }
     }
 
@@ -215,7 +118,7 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
 
                 <h2 className={styles.modalTitle}>Заповнити профіль</h2>
 
-                <form noValidate onSubmit={handleSubmit} className={styles.form}>
+                <form noValidate onSubmit={handleSubmit(onSubmit)} className={styles.form}>
                     {error && <div className={styles.errorAlert}>{error}</div>}
                     {success && <div className={styles.successAlert}>{success}</div>}
 
@@ -223,12 +126,13 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
                     <div className={styles.avatarSection}>
                         <label className={styles.fieldLabel}>Аватар</label>
                         <div className={styles.avatarCropWrapper}>
-                            <div 
+                            <div
                                 className={`${styles.avatarCircle} ${isDragging ? styles.grabbing : styles.grab}`}
                                 onMouseDown={handleMouseDown}
                                 onMouseMove={handleMouseMove}
                                 onMouseUp={handleMouseUpOrLeave}
                                 onMouseLeave={handleMouseUpOrLeave}
+                                touch-action="none"
                                 onTouchStart={handleTouchStart}
                                 onTouchMove={handleTouchMove}
                                 onTouchEnd={handleTouchEnd}
@@ -254,12 +158,19 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
                                     </div>
                                 )}
                             </div>
-                            
+
                             <div className={styles.cropHint}>
-                                {imageSrc ? 'Перетягуйте для зсуву, крутіть коліщатко або щипайте екран для масштабу' : 'Оберіть файл нижче'}
+                                {imageSrc
+                                    ? 'Перетягуйте для зсуву, крутіть коліщатко або щипайте екран для масштабу'
+                                    : 'Оберіть файл нижче'}
                             </div>
 
-                            <Button type="button" variant="ghost" className={styles.uploadBtn} onClick={triggerFileSelect}>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                className={styles.uploadBtn}
+                                onClick={triggerFileSelect}
+                            >
                                 Оберіть фото
                             </Button>
                             <input
@@ -276,43 +187,43 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
                         <Input
                             label="Ім'я"
                             type="text"
-                            value={firstName}
-                            onChange={(e) => setFirstName(e.target.value)}
                             placeholder="Олександр"
+                            error={errors.first_name?.message}
                             required
+                            {...register('first_name')}
                         />
                         <Input
                             label="Прізвище"
                             type="text"
-                            value={lastName}
-                            onChange={(e) => setLastName(e.target.value)}
                             placeholder="Коваленко"
+                            error={errors.last_name?.message}
                             required
+                            {...register('last_name')}
                         />
                     </div>
 
                     <Input
                         label="Мобільний телефон"
                         type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
                         placeholder="+380991234567"
+                        error={errors.phone?.message}
                         required
+                        {...register('phone')}
                     />
 
                     <Input
                         label="Нікнейм у Telegram"
                         type="text"
-                        value={telegram}
-                        onChange={(e) => setTelegram(e.target.value)}
                         placeholder="@username"
+                        error={errors.telegram?.message}
+                        {...register('telegram')}
                     />
 
                     <Select
                         label="Основний вид спорту"
-                        value={mainSport}
-                        onChange={(e) => setMainSport(e.target.value as SportType)}
+                        error={errors.main_sport?.message}
                         required
+                        {...register('main_sport')}
                     >
                         <option value="football">Футбол</option>
                         <option value="basketball">Баскетбол</option>
@@ -321,8 +232,13 @@ export const ProfileEditModal: React.FC<PropsType> = ({ user, isOpen, onClose })
                         <option value="other">Інше</option>
                     </Select>
 
-                    <Button type="submit" variant="primary" disabled={loading} className={styles.submitBtn}>
-                        {loading ? 'Збереження...' : 'Зберегти'}
+                    <Button
+                        type="submit"
+                        variant="primary"
+                        disabled={isSubmitting}
+                        className={styles.submitBtn}
+                    >
+                        {isSubmitting ? 'Збереження...' : 'Зберегти'}
                     </Button>
                 </form>
             </div>

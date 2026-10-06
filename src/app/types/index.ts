@@ -4,6 +4,8 @@ export interface OrganizerType {
   first_name?: string;
   last_name?: string;
   avatar_url?: string;
+  telegram?: string;
+  phone?: string;
 }
 
 export interface GameType {

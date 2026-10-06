@@ -15,7 +15,9 @@ import {
     ClockIcon,
     UsersIcon,
     ProfileIcon,
-    CheckIcon
+    CheckIcon,
+    TelegramIcon,
+    WhatsAppIcon
 } from '../Icons/Icons'
 import { joinGameAction } from '@/app/actions/games'
 import { useModalStore } from '@/store/useModalStore'
@@ -72,6 +74,26 @@ const formatDateTime = (dateStr: string) => {
     }
 }
 
+const getCleanTelegram = (tg?: string) => {
+    if (!tg) return null
+    let handle = tg.trim()
+    if (handle.startsWith('https://t.me/')) {
+        handle = handle.replace('https://t.me/', '')
+    } else if (handle.startsWith('t.me/')) {
+        handle = handle.replace('t.me/', '')
+    }
+    if (handle.startsWith('@')) {
+        handle = handle.slice(1)
+    }
+    return handle.trim() || null
+}
+
+const getCleanPhoneForWhatsApp = (phone?: string) => {
+    if (!phone) return null
+    const digits = phone.replace(/[^\d]/g, '')
+    return digits.length >= 9 ? digits : null
+}
+
 export const GameCard: React.FC<PropsType> = ({ game, isInactive }) => {
     const router = useRouter()
     const openLogin = useModalStore((state) => state.openLogin)
@@ -103,7 +125,7 @@ export const GameCard: React.FC<PropsType> = ({ game, isInactive }) => {
         if (!organizerProfile && organizer_id) {
             supabase
                 .from('profiles')
-                .select('first_name, avatar_url')
+                .select('first_name, last_name, avatar_url, telegram, phone')
                 .eq('id', organizer_id)
                 .maybeSingle()
                 .then(({ data }) => {
@@ -165,6 +187,8 @@ export const GameCard: React.FC<PropsType> = ({ game, isInactive }) => {
 
     const organizerName = organizerProfile?.first_name || 'Організатор'
     const organizerAvatar = organizerProfile?.avatar_url
+    const telegramHandle = getCleanTelegram(organizerProfile?.telegram)
+    const whatsappNumber = getCleanPhoneForWhatsApp(organizerProfile?.phone)
     const percent = Math.min(100, Math.round((currentCount / max_participants) * 100))
 
     return (
@@ -176,21 +200,54 @@ export const GameCard: React.FC<PropsType> = ({ game, isInactive }) => {
                 <h3>{title}</h3>
             </div>
 
-            {/* Про організатора тільки фото і ім'я */}
+            {/* Організатор: фото, ім'я та контактна інформація */}
             <div className={styles.organizator_info}>
-                {organizerAvatar ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                        src={organizerAvatar}
-                        alt={organizerName}
-                        className={styles.avatar}
-                    />
-                ) : (
-                    <div className={styles.avatarFallback}>
-                        <ProfileIcon />
+                <div className={styles.organizerProfile}>
+                    {organizerAvatar ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                            src={organizerAvatar}
+                            alt={organizerName}
+                            className={styles.avatar}
+                        />
+                    ) : (
+                        <div className={styles.avatarFallback}>
+                            <ProfileIcon />
+                        </div>
+                    )}
+                    <span className={styles.name}>{organizerName}</span>
+                </div>
+
+                {(telegramHandle || whatsappNumber) && (
+                    <div className={styles.contacts}>
+                        {telegramHandle && (
+                            <a
+                                href={`https://t.me/${telegramHandle}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.telegramLink}
+                                title={`Написати в Telegram: @${telegramHandle}`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <TelegramIcon />
+                                <span>@{telegramHandle}</span>
+                            </a>
+                        )}
+                        {whatsappNumber && (
+                            <a
+                                href={`https://wa.me/${whatsappNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.whatsappLink}
+                                title={`Написати у WhatsApp: ${organizerProfile?.phone || whatsappNumber}`}
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <WhatsAppIcon />
+                                <span>WhatsApp</span>
+                            </a>
+                        )}
                     </div>
                 )}
-                <span className={styles.name}>{organizerName}</span>
             </div>
 
             <div className={styles.info}>
